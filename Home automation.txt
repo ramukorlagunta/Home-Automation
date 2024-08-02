@@ -1,0 +1,54 @@
+#include <DHT.h>
+
+#define DHTPIN 2           // Pin where the temperature sensor is connected
+#define DHTTYPE DHT11      // Type of the DHT sensor (DHT11 or DHT22)
+#define LED_PIN 9          // Pin where the LED is connected
+#define FAN_PIN 8          // Pin where the relay for the fan is connected
+#define LDR_PIN A0         // Analog pin where the LDR is connected
+
+DHT dht(DHTPIN, DHTTYPE);
+
+const int LIGHT_THRESHOLD = 300;  // Adjust this value based on your light sensor
+const int TEMP_THRESHOLD = 25;    // Temperature threshold in Celsius
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(FAN_PIN, OUTPUT);
+  dht.begin();
+}
+
+void loop() {
+  // Read light intensity
+  int lightLevel = analogRead(LDR_PIN);
+
+  // Read temperature
+  float temperature = dht.readTemperature();
+  if (isnan(temperature)) {
+    Serial.println("Failed to read temperature!");
+    return;
+  }
+
+  // Control LED based on light intensity
+  if (lightLevel < LIGHT_THRESHOLD) {
+    digitalWrite(LED_PIN, HIGH);
+  } else {
+    digitalWrite(LED_PIN, LOW);
+  }
+
+  // Control fan based on temperature
+  if (temperature > TEMP_THRESHOLD) {
+    digitalWrite(FAN_PIN, HIGH);
+  } else {
+    digitalWrite(FAN_PIN, LOW);
+  }
+
+  // Print readings for debugging
+  Serial.print("Light Level: ");
+  Serial.print(lightLevel);
+  Serial.print(" | Temperature: ");
+  Serial.print(temperature);
+  Serial.println(" C");
+
+  delay(1000);  // Adjust the delay as needed
+}
